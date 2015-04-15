@@ -12,7 +12,8 @@ var _ = require('underscore');
 exports.paths = {
   'siteAssets' : path.join(__dirname, '../web/public'),
   'archivedSites' : path.join(__dirname, '../archives/sites'),
-  'list' : path.join(__dirname, '../archives/sites.txt')
+  'list' : path.join(__dirname, '../archives/sites.txt'),
+  'emptyReq' : '/'
 };
 
 // Used for stubbing paths for jasmine tests, do not modify
@@ -28,7 +29,16 @@ exports.initialize = function(pathsObj){
 exports.readListOfUrls = function(){
 };
 
-exports.isUrlInList = function(){
+exports.isUrlInList = function(url){
+  var result = false;
+  fs.readFile(paths.list, function(err, data){
+    if(err) { throw err; }
+    else {
+      console.log(data);
+    }
+  });
+
+  return result;
 };
 
 exports.addUrlToList = function(){
