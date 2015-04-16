@@ -44,10 +44,6 @@ exports.handleRequest = function (req, res) {
 
   } else if(req.method === 'GET' && req.url[0] === '/' && req.url.length > 1){
     var filename = req.url.substring(1);
-    if (archive.isURLArchived(filename)){
-      statuscode = 200;
-      responseData = archive.getDataFromFile(filename);
-    }
   } else if(req.method === 'POST' && req.url[0] === '/'){
     console.log('in post');
     var data = '';
@@ -61,19 +57,23 @@ exports.handleRequest = function (req, res) {
         console.log('in the if block');
         statuscode = 302;
         archive.addUrlToList(filename);
+      }else if (archive.isURLArchived(filename)){
+        res.writeHead(302, {'Content-Type': 'text/html'});
+        res.end(archive.getDataFromFile(filename));
+      }else{
+        fs.readFile(archive.paths.siteAssets + '/loading.html', function (err,data) {
+          if (err) {
+            console.log('error',archive.paths.siteAssets + 'loading.html');
+            statuscode = 404;
+            responseData = JSON.stringify(err);
+            return;
+          } else{
+            console.log('getting loading.html',data);
+            res.writeHead(302, {'Content-Type': 'text/html'});
+            res.end(data);
+          }
+        });
       }
-      fs.readFile(archive.paths.siteAssets + '/loading.html', function (err,data) {
-        if (err) {
-          console.log('error',archive.paths.siteAssets + 'loading.html');
-          statuscode = 404;
-          responseData = JSON.stringify(err);
-          return;
-        } else{
-          console.log('getting loading.html',data);
-          res.writeHead(302, {'Content-Type': 'text/html'});
-          res.end(data);
-        }
-      });
     });
   }
   console.log(helpers.headers);
