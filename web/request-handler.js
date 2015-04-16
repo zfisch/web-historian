@@ -17,10 +17,22 @@ exports.handleRequest = function (req, res) {
     responseData = '<input';
   } else if(req.method === 'GET' && req.url[0] === '/' && req.url.length > 1){
     var filename = req.url.substring(1);
-    if (archive.isUrlInList(filename)){
+    if (archive.isURLArchived(filename)){
       statuscode = 200;
       responseData = archive.getDataFromFile(filename);
     }
+  } else if(req.method === 'POST' && req.url[0] === '/'){
+    var data = '';
+    req.on('data',function(chunk){
+      data +=chunk;
+    });
+    req.on('end',function(){
+      var filename = data.substring(4);
+      if(!archive.isUrlInList(filename) && !archive.isURLArchived(filename)){
+        statuscode = 302;
+        archive.addUrlToList(filename);
+      }
+    });
   }
   res.writeHead(statuscode, helpers.headers);
   res.end(responseData);
